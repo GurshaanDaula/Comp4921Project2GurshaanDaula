@@ -3,12 +3,22 @@ const express = require("express");
 const path = require("path");
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
-const mongoose = require("mongoose");
 const pool = require("./db/connection");
+
+// 🧩 Auto-install mongoose if missing
+let mongoose;
+try {
+    mongoose = require("mongoose");
+} catch (err) {
+    console.warn("⚠️ Mongoose not found — installing it now...");
+    const { execSync } = require("child_process");
+    execSync("npm install mongoose", { stdio: "inherit" });
+    mongoose = require("mongoose");
+}
 
 const app = express();
 
-// Middleware
+// Middleware setup
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
