@@ -1,0 +1,71 @@
+<%- include('templates/header', { loggedIn, username, title: thread.title }) %>
+
+    <div class="glass-card mb-5">
+        <div class="thread-header">
+            <img src="<%= thread.profile_image || '/images/default.png' %>">
+            <strong>
+                <%= thread.username %>
+            </strong>
+        </div>
+        <h2 class="thread-title shiny-text">
+            <%= thread.title %>
+        </h2>
+        <p class="thread-desc blur-text">
+            <%= thread.description %>
+        </p>
+        <div class="thread-meta mb-3">
+            <span><i class="fa fa-heart"></i>
+                <%= thread.total_likes || 0 %>
+            </span>
+            <span><i class="fa fa-eye"></i>
+                <%= thread.views || 0 %>
+            </span>
+        </div>
+        <% if (loggedIn) { %>
+            <form method="post" action="/threads/<%= thread.thread_id %>/like">
+                <button class="btn btn-primary mb-3"><i class="fa fa-heart"></i> Like Thread</button>
+            </form>
+            <% } %>
+    </div>
+
+    <h4 class="mb-3 split-text">Comments</h4>
+
+    <% if (comments && comments.length> 0) { %>
+        <% comments.forEach(c=> { %>
+            <div class="comment-card">
+                <div class="comment-header">
+                    <img src="<%= c.profile_image || '/images/default.png' %>">
+                    <strong>
+                        <%= c.username %>
+                    </strong>
+                </div>
+                <p class="comment-content trail-text">
+                    <%= c.content %>
+                </p>
+                <div class="comment-footer">
+                    <%= new Date(c.created_at).toLocaleString() %>
+                </div>
+                <% if (loggedIn) { %>
+                    <form method="post" action="/comments/<%= c.comment_id %>/like" class="mt-2">
+                        <button class="btn btn-outline-danger btn-sm"><i class="fa fa-heart"></i> Like</button>
+                    </form>
+                    <% } %>
+            </div>
+            <% }) %>
+                <% } else { %>
+                    <p>No comments yet.</p>
+                    <% } %>
+
+                        <% if (loggedIn) { %>
+                            <form method="post" action="/threads/<%= thread.thread_id %>/comments" class="mt-4"
+                                style="max-width: 600px;">
+                                <textarea name="content" class="form-control mb-2" rows="3"
+                                    placeholder="Write a comment..."></textarea>
+                                <button class="btn btn-primary">Post Comment</button>
+                            </form>
+                            <% } else { %>
+                                <p class="text-muted">You must <a href="/login">log in</a> to comment.</p>
+                                <% } %>
+
+                                    <%- include('templates/footer') %>
+                                        <script src="/js/animations.js"></script>

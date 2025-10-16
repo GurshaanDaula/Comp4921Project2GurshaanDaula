@@ -1,0 +1,41 @@
+<%- include('templates/header', { loggedIn, username, title: 'Stats' }) %>
+
+    <div class="text-center mb-5">
+        <h2 class="shiny-text">Most Popular Threads</h2>
+    </div>
+
+    <table class="table table-dark table-striped text-light">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Likes</th>
+                <th>Views</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% threads.forEach(t=> { %>
+                <tr>
+                    <td><a href="/threads/<%= t.thread_id %>" class="text-light">
+                            <%= t.title %>
+                        </a></td>
+                    <td>
+                        <%= t.username %>
+                    </td>
+                    <td>
+                        <%= t.total_likes %>
+                    </td>
+                    <td>
+                        <%= t.view_count %>
+                    </td>
+                    <td>
+                        <%= new Date(t.created_at).toLocaleDateString() %>
+                    </td>
+                </tr>
+                <% }) %>
+        </tbody>
+    </table>
+
+    <%- include('templates/footer') %>
+        <script src="/js/animations.js"></script>

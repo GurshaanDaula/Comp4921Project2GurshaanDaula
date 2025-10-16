@@ -1,0 +1,12 @@
+<%- include('templates/header', { loggedIn, username, title: 'Error' }) %>
+
+    <div class="glass-card text-center p-5 mx-auto" style="max-width: 500px;">
+        <h1 class="shiny-text text-danger mb-3">Error</h1>
+        <p>
+            <%= message || "Something went wrong!" %>
+        </p>
+        <a href="/" class="btn btn-primary mt-3">Back to Home</a>
+    </div>
+
+    <%- include('templates/footer') %>
+        <script src="/js/animations.js"></script>

@@ -1,0 +1,46 @@
+<%- include('templates/header', { loggedIn, username, title: 'Home' }) %>
+
+    <div class="text-center mb-5">
+        <h1 class="shiny-text">Discussion Threads</h1>
+    </div>
+
+    <form class="d-flex mb-5 justify-content-center" action="/search" method="get" style="max-width: 600px;">
+        <input type="text" name="q" class="form-control me-2" placeholder="Search threads or comments..."
+            value="<%= query || '' %>">
+        <button class="btn btn-primary">Search</button>
+    </form>
+
+    <% if (threads && threads.length> 0) { %>
+        <% threads.forEach(thread=> { %>
+            <div class="glass-card">
+                <div class="thread-header">
+                    <img src="<%= thread.profile_image || '/images/default.png' %>">
+                    <strong>
+                        <%= thread.username %>
+                    </strong>
+                </div>
+                <h3 class="thread-title split-text"><a href="/threads/<%= thread.thread_id %>">
+                        <%= thread.title %>
+                    </a></h3>
+                <p class="thread-desc blur-text">
+                    <%= thread.description %>
+                </p>
+                <div class="thread-meta">
+                    <span><i class="fa fa-heart"></i>
+                        <%= thread.likes || 0 %>
+                    </span>
+                    <span><i class="fa fa-eye"></i>
+                        <%= thread.views || 0 %>
+                    </span>
+                    <span><i class="fa fa-comment"></i>
+                        <%= thread.comment_count || 0 %>
+                    </span>
+                </div>
+            </div>
+            <% }) %>
+                <% } else { %>
+                    <div class="text-center text-muted">No threads yet.</div>
+                    <% } %>
+
+                        <%- include('templates/footer') %>
+                            <script src="/js/animations.js"></script>
