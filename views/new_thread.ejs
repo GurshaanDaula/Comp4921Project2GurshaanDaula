@@ -1,0 +1,27 @@
+<%- include('templates/header', { loggedIn, username, title: 'Create Thread' }) %>
+
+    <div class="glass-card mx-auto p-4" style="max-width: 600px;">
+        <h3 class="text-center shiny-text mb-4">Create a New Thread</h3>
+
+        <% if (message) { %>
+            <div class="alert alert-danger text-center">
+                <%= message %>
+            </div>
+            <% } %>
+
+                <form method="POST" action="/threads/new">
+                    <div class="mb-3">
+                        <label class="form-label">Thread Title</label>
+                        <input type="text" name="title" class="form-control" required maxlength="255" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea name="description" class="form-control" rows="5" required></textarea>
+                    </div>
+
+                    <button class="btn btn-primary w-100">Create Thread</button>
+                </form>
+    </div>
+
+    <%- include('templates/footer') %>

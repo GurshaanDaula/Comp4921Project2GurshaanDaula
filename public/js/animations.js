@@ -1,6 +1,4 @@
-// animations.js
 
-// Utility: split text content into spans for each character
 function splitText(element) {
     const text = element.textContent;
     element.textContent = "";
@@ -13,11 +11,9 @@ function splitText(element) {
     });
 }
 
-// Activate split-text animations
 function runSplitText() {
     document.querySelectorAll(".split-text").forEach(el => {
         splitText(el);
-        // small timeout to trigger transitions
         setTimeout(() => {
             el.querySelectorAll("span.char").forEach((span, idx) => {
                 span.style.transitionDelay = (idx * 0.03) + "s";
@@ -28,17 +24,14 @@ function runSplitText() {
     });
 }
 
-// Blur-text activation
 function runBlurText() {
     document.querySelectorAll(".blur-text").forEach(el => {
-        // small delay then add active class
         setTimeout(() => {
             el.classList.add("active");
         }, 100);
     });
 }
 
-// Trail-text activation
 function runTrailText() {
     document.querySelectorAll(".trail-text").forEach(el => {
         splitText(el);
@@ -48,7 +41,6 @@ function runTrailText() {
     });
 }
 
-// On DOM content loaded
 document.addEventListener("DOMContentLoaded", () => {
     runSplitText();
     runBlurText();

@@ -10,37 +10,48 @@
         <button class="btn btn-primary">Search</button>
     </form>
 
-    <% if (threads && threads.length> 0) { %>
-        <% threads.forEach(thread=> { %>
-            <div class="glass-card">
-                <div class="thread-header">
-                    <img src="<%= thread.profile_image || '/images/default.png' %>">
-                    <strong>
-                        <%= thread.username %>
-                    </strong>
-                </div>
-                <h3 class="thread-title split-text"><a href="/threads/<%= thread.thread_id %>">
-                        <%= thread.title %>
-                    </a></h3>
-                <p class="thread-desc blur-text">
-                    <%= thread.description %>
-                </p>
-                <div class="thread-meta">
-                    <span><i class="fa fa-heart"></i>
-                        <%= thread.likes || 0 %>
-                    </span>
-                    <span><i class="fa fa-eye"></i>
-                        <%= thread.views || 0 %>
-                    </span>
-                    <span><i class="fa fa-comment"></i>
-                        <%= thread.comment_count || 0 %>
-                    </span>
-                </div>
-            </div>
-            <% }) %>
-                <% } else { %>
-                    <div class="text-center text-muted">No threads yet.</div>
-                    <% } %>
+    <div class="container d-flex flex-column align-items-center">
+        <% if (threads && threads.length> 0) { %>
+            <% threads.forEach(thread=> { %>
+                <a href="/threads/<%= thread.thread_id %>" class="text-decoration-none text-light w-100"
+                    style="max-width: 800px;">
+                    <div class="glass-card mb-4 p-4 thread-card">
+                        <div class="thread-header d-flex align-items-center mb-2">
+                            <img src="<%= thread.profile_image || '/images/default.png' %>" alt="Profile"
+                                class="rounded-circle me-2" width="45" height="45">
+                            <strong>
+                                <%= thread.username %>
+                            </strong>
+                        </div>
 
-                        <%- include('templates/footer') %>
-                            <script src="/js/animations.js"></script>
+                        <h3 class="thread-title mb-2 split-text">
+                            <%= thread.title %>
+                        </h3>
+                        <p class="thread-desc blur-text mb-3">
+                            <%= thread.description %>
+                        </p>
+
+                        <div class="thread-meta d-flex justify-content-between text-secondary small">
+                            <span><i class="fa fa-heart text-danger me-1"></i>
+                                <%= thread.likes || 0 %> Likes
+                            </span>
+                            <span><i class="fa fa-eye text-info me-1"></i>
+                                <%= thread.views || 0 %> Views
+                            </span>
+                            <span><i class="fa fa-comment text-warning me-1"></i>
+                                <%= thread.comment_count || 0 %> Comments
+                            </span>
+                            <span><i class="fa fa-calendar text-light me-1"></i>
+                                <%= new Date(thread.created_at).toLocaleString() %>
+                            </span>
+                        </div>
+                    </div>
+                </a>
+                <% }) %>
+                    <% } else { %>
+                        <div class="text-center text-muted mt-5">No threads yet.</div>
+                        <% } %>
+    </div>
+
+    <%- include('templates/footer') %>
+        <script src="/js/animations.js"></script>
