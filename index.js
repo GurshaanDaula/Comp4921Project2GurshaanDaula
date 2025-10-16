@@ -16,14 +16,21 @@ app.set("views", path.join(__dirname, "views"));
 
 app.use(
     session({
-        secret: process.env.SESSION_SECRET,
+        secret: process.env.SESSION_SECRET || "supersecret",
         resave: false,
         saveUninitialized: false,
         store: MongoStore.create({
             mongoUrl: process.env.MONGO_URI,
-            ttl: 60 * 60, 
+            mongoOptions: {
+                serverSelectionTimeoutMS: 10000, // 10 seconds
+                connectTimeoutMS: 10000,
+            },
+            ttl: 60 * 60, // 1 hour
         }),
-        cookie: { maxAge: 60 * 60 * 1000 },
+        cookie: {
+            secure: process.env.NODE_ENV === "production",
+            maxAge: 60 * 60 * 1000,
+        },
     })
 );
 
