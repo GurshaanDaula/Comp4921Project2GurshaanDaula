@@ -83,7 +83,9 @@ const newThreadRoutes = require("./routes/new_thread");
 const likeRoutes = require("./routes/likes");
 const commentRoutes = require("./routes/comments");
 const searchRoutes = require("./routes/search");
+const randomRoutes = require("./routes/random");
 
+app.use("/", randomRoutes);
 app.use("/", likeRoutes);
 app.use("/", authRoutes);
 app.use("/", newThreadRoutes);

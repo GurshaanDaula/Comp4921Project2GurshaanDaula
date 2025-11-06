@@ -1,56 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
+<%- include('templates/header', { loggedIn, username, title: 'Home' }) %>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create New Thread</title>
-    <link rel="stylesheet" href="/css/style.css">
-</head>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Create New Thread</title>
+        <link rel="stylesheet" href="/css/style.css">
+    </head>
 
-<body>
-    <nav class="navbar">
-        <div class="container">
-            <a href="/" class="navbar-brand shiny-text">My Forum</a>
-            <div class="nav-links">
-                <a href="/" class="nav-link">Home</a>
-                <a href="/stats" class="nav-link">Stats</a>
-                <a href="/threads/new" class="nav-link active">New Thread</a>
-                <% if (loggedIn) { %>
-                    <span class="nav-link">Logged in as <strong>
-                            <%= username %>
-                        </strong></span>
-                    <a href="/logout" class="nav-link">Logout</a>
-                    <% } else { %>
-                        <a href="/login" class="nav-link">Login</a>
-                        <% } %>
-            </div>
-        </div>
-    </nav>
+    <body>
 
-    <main class="container">
-        <h1 class="shiny-text">Create a New Thread</h1>
 
-        <form action="/threads/new" method="POST" class="glass-card">
-            <div>
-                <label for="title">Title:</label>
-                <input type="text" name="title" id="title" required />
-            </div>
+        <main class="container">
+            <h1 class="shiny-text">Create a New Thread</h1>
 
-            <div style="margin-top: 1rem;">
-                <label for="description">Description:</label>
-                <textarea name="description" id="description" rows="6" required></textarea>
-            </div>
+            <form action="/threads/new" method="POST" class="glass-card">
+                <div>
+                    <label for="title">Title:</label>
+                    <input type="text" name="title" id="title" required />
+                </div>
 
-            <button type="submit" class="btn btn-primary" style="margin-top:1.2rem;">
-                Post Thread
-            </button>
-        </form>
-    </main>
+                <div style="margin-top: 1rem;">
+                    <label for="description">Description:</label>
+                    <textarea name="description" id="description" rows="6" required></textarea>
+                </div>
 
-    <footer>
-        <p>© 2025 My Forum App. All rights reserved.</p>
-    </footer>
-</body>
+                <button type="submit" class="btn btn-primary" style="margin-top:1.2rem;">
+                    Post Thread
+                </button>
+            </form>
+        </main>
+
+        <footer>
+            <p>© 2025 My Forum App. All rights reserved.</p>
+        </footer>
+    </body>
 
 </html>
