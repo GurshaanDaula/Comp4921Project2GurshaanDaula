@@ -6,6 +6,8 @@ const { ensureLoggedIn, ensureCanModifyComment } = require("../middleware/authz"
 
 // Create a comment
 router.post("/threads/:thread_id/comments", ensureLoggedIn, async (req, res) => {
+    console.log("🔍 Session check on comment POST:", req.session);
+
     try {
         const { content } = req.body;
         const threadId = req.params.thread_id;
