@@ -2,12 +2,25 @@
 const pool = require("../db/connection");
 
 // Require login
+// Require login
 function ensureLoggedIn(req, res, next) {
-    if (!req.session?.loggedIn) {
-        return res.redirect("/login");
+    if (req.session?.loggedIn) return next();
+
+    // Handle AJAX or form POSTs differently
+    if (req.method === "POST") {
+        // For API/fetch: respond JSON; for HTML form: redirect manually
+        if (req.headers.accept && req.headers.accept.includes("application/json")) {
+            return res.status(401).json({ success: false, message: "Login required" });
+        } else {
+            // fallback for normal form submissions
+            return res.redirect("/login");
+        }
     }
-    next();
+
+    // For normal GET routes
+    return res.redirect("/login");
 }
+
 
 // Only the comment owner can edit their comment.
 // Thread owner may delete *others'* comments on that thread.
