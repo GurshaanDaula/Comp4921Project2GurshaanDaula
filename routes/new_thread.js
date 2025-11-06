@@ -104,9 +104,10 @@ router.get("/threads/:id", async (req, res) => {
             totalLikes
         });
     } catch (err) {
-        console.error("Error loading thread:", err);
-        res.status(500).send("Error loading thread");
+        console.error("❌ Error loading thread:", err);
+        res.status(500).render("error", { message: err.message });
     }
+
 });
 
 
