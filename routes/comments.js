@@ -19,7 +19,7 @@ router.post("/threads/:thread_id/comments", ensureLoggedIn, async (req, res) => 
 
         await pool.query(
             `INSERT INTO comments (thread_id, user_id, content, likes, created_at)
-       VALUES (?, ?, ?, 0, NOW())`,
+    VALUES (?, ?, ?, 0, NOW())`,
             [threadId, userId, content.trim()]
         );
 
