@@ -1,71 +1,266 @@
-<%- include('templates/header', { loggedIn, username, title: thread.title }) %>
+<!DOCTYPE html>
+<html>
 
-    <div class="glass-card mb-5">
-        <div class="thread-header">
-            <img src="<%= thread.profile_image || '/images/default.png' %>">
-            <strong>
-                <%= thread.username %>
-            </strong>
-        </div>
-        <h2 class="thread-title shiny-text">
-            <%= thread.title %>
-        </h2>
-        <p class="thread-desc blur-text">
-            <%= thread.description %>
-        </p>
-        <div class="thread-meta mb-3">
-            <span><i class="fa fa-heart"></i>
-                <%= thread.total_likes || 0 %>
-            </span>
-            <span><i class="fa fa-eye"></i>
-                <%= thread.views || 0 %>
-            </span>
-        </div>
-        <% if (loggedIn) { %>
-            <form method="post" action="/threads/<%= thread.thread_id %>/like">
-                <button class="btn btn-primary mb-3"><i class="fa fa-heart"></i> Like Thread</button>
-            </form>
-            <% } %>
-    </div>
+<head>
+    <title>
+        <%= thread.title %>
+    </title>
+    <meta charset="utf-8" />
+    <style>
+        .container {
+            max-width: 900px;
+            margin: 24px auto;
+            padding: 0 16px;
+        }
 
-    <h4 class="mb-3 split-text">Comments</h4>
+        header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
 
-    <% if (comments && comments.length> 0) { %>
-        <% comments.forEach(c=> { %>
-            <div class="comment-card">
-                <div class="comment-header">
-                    <img src="<%= c.profile_image || '/images/default.png' %>">
-                    <strong>
-                        <%= c.username %>
-                    </strong>
-                </div>
-                <p class="comment-content trail-text">
-                    <%= c.content %>
-                </p>
-                <div class="comment-footer">
-                    <%= new Date(c.created_at).toLocaleString() %>
-                </div>
+        header a {
+            text-decoration: none;
+        }
+
+        header form {
+            margin-left: auto;
+            display: flex;
+            gap: 6px;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            vertical-align: middle;
+        }
+
+        .byline {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 16px;
+            margin: 8px 0 16px;
+            align-items: center;
+        }
+
+        .thread {
+            padding: 16px;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            margin-bottom: 24px;
+        }
+
+        .comments {
+            padding: 16px;
+            border: 1px solid #eee;
+            border-radius: 10px;
+        }
+
+        .comment-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .comment {
+            display: flex;
+            gap: 10px;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .comment:last-child {
+            border-bottom: none;
+        }
+
+        .comment .meta {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+        }
+
+        .comment .content {
+            white-space: pre-wrap;
+        }
+
+        .comment .actions {
+            margin-top: 6px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn,
+        button {
+            cursor: pointer;
+            border: 1px solid #ddd;
+            background: #fafafa;
+            padding: 6px 10px;
+            border-radius: 8px;
+        }
+
+        .btn-danger {
+            border-color: #f5c2c7;
+            background: #f8d7da;
+        }
+
+        .btn-like.liked,
+        #like-thread.liked {
+            font-weight: 700;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+
+        .inline {
+            display: inline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <a href="/">Home</a> • <a href="/stats">Stats</a> • <a href="/threads/new">New Thread</a>
+            <% if (loggedIn) { %> • <span>Logged in as <strong>
+                        <%= username %>
+                    </strong></span> • <a href="/logout">Logout</a>
+                <% } else { %> • <a href="/login">Login</a>
+                    <% } %>
+                        <form action="/search" method="GET">
+                            <input name="q" placeholder="Search..." />
+                            <button type="submit">Search</button>
+                        </form>
+        </header>
+
+        <article class="thread">
+            <h1>
+                <%= thread.title %>
+            </h1>
+            <div class="byline">
+                <img src="<%= thread.profile_image %>" class="avatar" alt="avatar" />
+                <strong>
+                    <%= thread.username %>
+                </strong>
+                <small>• <%= new Date(thread.created_at).toLocaleString() %></small>
+            </div>
+            <p>
+                <%= thread.description %>
+            </p>
+
+            <div class="stats">
+                <span>Views: <%= thread.views %></span>
+                <span>Total Likes: <%= totalLikes %></span>
                 <% if (loggedIn) { %>
-                    <form method="post" action="/comments/<%= c.comment_id %>/like" class="mt-2">
-                        <button class="btn btn-outline-danger btn-sm"><i class="fa fa-heart"></i> Like</button>
-                    </form>
+                    <button id="like-thread" class="<%= thread.user_has_liked ? 'liked' : '' %>">♥ Like thread</button>
                     <% } %>
             </div>
-            <% }) %>
+        </article>
+
+        <section class="comments">
+            <h2>Comments</h2>
+
+            <!-- INLINE COMMENTS LIST (no partial) -->
+            <% if (comments && comments.length) { %>
+                <ul class="comment-list">
+                    <% comments.forEach(c=> { %>
+                        <li class="comment">
+                            <img src="<%= c.profile_image %>" alt="avatar" class="avatar" />
+                            <div class="body">
+                                <div class="meta">
+                                    <strong>
+                                        <%= c.username %>
+                                    </strong>
+                                    <small>• <%= new Date(c.created_at).toLocaleString() %></small>
+                                </div>
+                                <div class="content">
+                                    <%= c.content %>
+                                </div>
+                                <div class="actions">
+                                    <% if (loggedIn) { %>
+                                        <form class="inline" onsubmit="return false;">
+                                            <button class="btn btn-like" data-liked="false" <button class="btn btn-like"
+                                                type="button" data-comment-id="<%= c.comment_id %>">♥ Like</button>
+                                            ♥ Like
+                                            </button>
+                                        </form>
+                                        <% if (username===c.username) { %>
+                                            <a class="btn" href="/comments/<%= c.comment_id %>/edit">Edit</a>
+                                            <% } %>
+                                                <!-- Thread owner can also delete; server enforces -->
+                                                <form class="inline" action="/comments/<%= c.comment_id %>/delete"
+                                                    method="POST">
+                                                    <button class="btn btn-danger" type="submit">Delete</button>
+                                                </form>
+                                                <% } %>
+                                </div>
+                            </div>
+                        </li>
+                        <% }) %>
+                </ul>
                 <% } else { %>
                     <p>No comments yet.</p>
                     <% } %>
 
                         <% if (loggedIn) { %>
-                            <form method="post" action="/threads/<%= thread.thread_id %>/comments" class="mt-4"
-                                style="max-width: 600px;">
-                                <textarea name="content" class="form-control mb-2" rows="3"
-                                    placeholder="Write a comment..."></textarea>
-                                <button class="btn btn-primary">Post Comment</button>
+                            <form action="/threads/<%= thread.thread_id %>/comments" method="POST"
+                                style="margin-top:14px;">
+                                <textarea name="content" rows="3" placeholder="Write a comment..." required></textarea>
+                                <div style="margin-top:8px;">
+                                    <button type="submit">Post Comment</button>
+                                </div>
                             </form>
                             <% } else { %>
-                                <p class="text-muted">You must <a href="/login">log in</a> to comment.</p>
+                                <p><a href="/login">Log in</a> to comment.</p>
                                 <% } %>
+        </section>
+    </div>
 
-                                    <%- include('templates/footer') %>
-                                        <script src="/js/animations.js"></script>
+    <script>
+        // Thread like (keep as-is if it's working)
+        (function () {
+            const btn = document.getElementById("like-thread");
+            if (!btn) return;
+            btn.addEventListener("click", async () => {
+                const res = await fetch("/like/<%= thread.thread_id %>", { method: "POST" });
+                const data = await res.json();
+                if (data && data.success) location.reload();
+            });
+        })();
+
+        // Comment like — event delegation (no inline onclick)
+        document.addEventListener("click", async (e) => {
+            const btn = e.target.closest('.btn-like[data-comment-id]');
+            if (!btn) return;
+
+            const id = btn.dataset.commentId;
+            try {
+                const res = await fetch(`/comments/${id}/like`, { method: "POST" });
+                const data = await res.json();
+                if (data && data.success) {
+                    btn.classList.toggle("liked", data.liked);
+                    btn.textContent = data.liked ? "♥ Liked" : "♥ Like";
+                }
+            } catch (err) {
+                console.error("Comment like failed:", err);
+            }
+        });
+    </script>
+
+</body>
+
+</html>

@@ -52,37 +52,63 @@ router.post("/threads/new", ensureLoggedIn, async (req, res) => {
     }
 });
 
+// ...top of file unchanged...
 router.get("/threads/:id", async (req, res) => {
     try {
-        const [rows] = await pool.query(
-            `SELECT t.*, u.username, u.profile_image 
-       FROM threads t 
-       JOIN users u ON t.user_id = u.user_id 
+        const threadId = req.params.id;
+
+        const [[thread]] = await pool.query(
+            `SELECT t.*, u.username, u.profile_image
+       FROM threads t
+       JOIN users u ON t.user_id = u.user_id
        WHERE t.thread_id = ?`,
-            [req.params.id]
+            [threadId]
         );
-
-        if (rows.length === 0) {
-            return res.status(404).send("Thread not found");
-        }
-
-        const thread = rows[0];
+        if (!thread) return res.status(404).send("Thread not found");
 
         // increment view count
-        await pool.query("UPDATE threads SET views = views + 1 WHERE thread_id = ?", [thread.thread_id]);
+        await pool.query("UPDATE threads SET views = views + 1 WHERE thread_id = ?", [threadId]);
         thread.views++;
+
+        // comments (with author + profile image)
+        const [comments] = await pool.query(
+            `SELECT c.comment_id, c.content, c.likes,
+              c.created_at, u.username, u.profile_image, u.user_id
+       FROM comments c
+       JOIN users u ON u.user_id = c.user_id
+       WHERE c.thread_id = ?
+       ORDER BY c.created_at ASC`,
+            [threadId]
+        );
+
+        // total likes = thread_likes + comment_likes
+        const [[likeTotals]] = await pool.query(
+            `SELECT t.likes AS thread_likes,
+              COALESCE((
+                SELECT COUNT(*)
+                FROM comment_likes cl
+                JOIN comments c2 ON c2.comment_id = cl.comment_id
+                WHERE c2.thread_id = t.thread_id
+              ), 0) AS comment_likes
+       FROM threads t
+       WHERE t.thread_id = ?`,
+            [threadId]
+        );
+        const totalLikes = (likeTotals?.thread_likes || 0) + (likeTotals?.comment_likes || 0);
 
         res.render("thread", {
             loggedIn: req.session.loggedIn,
             username: req.session.username,
             thread,
-            comments: [],
+            comments,
+            totalLikes
         });
     } catch (err) {
         console.error("Error loading thread:", err);
         res.status(500).send("Error loading thread");
     }
 });
+
 
 
 module.exports = router;

@@ -5,7 +5,6 @@ const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const pool = require("./db/connection");
 
-// 🧩 Auto-install mongoose if missing
 let mongoose;
 try {
     mongoose = require("mongoose");
@@ -17,6 +16,12 @@ try {
 }
 
 const app = express();
+// index.js (additions)
+const commentRoutes = require("./routes/comments");
+const searchRoutes = require("./routes/search");
+
+app.use("/", commentRoutes);
+app.use("/", searchRoutes);
 
 // Middleware setup
 app.use(express.urlencoded({ extended: true }));
@@ -110,29 +115,47 @@ app.get("/", async (req, res) => {
     }
 });
 
-// =============================
-// 📊 Stats Page
-// =============================
+// /stats in index.js
 app.get("/stats", async (req, res) => {
     try {
-        const [threads] = await pool.query(
-            `SELECT t.*, u.username 
-             FROM threads t
-             JOIN users u ON t.user_id = u.user_id
-             ORDER BY (t.likes + t.views) DESC`
+        const [rows] = await pool.query(
+            `SELECT
+          t.thread_id, t.title, t.description, t.views, t.created_at,
+          u.username,
+          t.likes AS thread_likes,
+          COALESCE((
+            SELECT COUNT(*) FROM comment_likes cl
+            JOIN comments c ON c.comment_id = cl.comment_id
+            WHERE c.thread_id = t.thread_id
+          ), 0) AS comment_likes,
+          (SELECT COUNT(*) FROM comments c2 WHERE c2.thread_id = t.thread_id) AS comment_count
+        FROM threads t
+        JOIN users u ON u.user_id = t.user_id
+        ORDER BY (t.likes +
+          (SELECT COUNT(*) FROM comment_likes cl2
+           JOIN comments c3 ON c3.comment_id = cl2.comment_id
+           WHERE c3.thread_id = t.thread_id)
+        ) DESC, t.views DESC, t.created_at DESC
+        LIMIT 100`
         );
+
+        const threads = rows.map(r => ({
+            ...r,
+            total_likes: r.thread_likes + r.comment_likes
+        }));
 
         res.render("stats", {
             loggedIn: req.session.loggedIn,
             username: req.session.username,
             threads,
-            comments: [],
+            comments: [] // not used here
         });
     } catch (err) {
         console.error("Error loading stats:", err);
         res.status(500).render("error", { message: "Error loading stats page." });
     }
 });
+
 
 // =============================
 // ❌ 404 Fallback
