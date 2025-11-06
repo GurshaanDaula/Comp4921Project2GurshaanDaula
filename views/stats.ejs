@@ -1,27 +1,69 @@
-<%- include('templates/header', { loggedIn, username, title: 'Stats' }) %>
+<!DOCTYPE html>
+<html lang="en">
 
-    <div class="container py-4">
-        <h2 class="shiny-text mb-4 text-center">🔥 Most Popular Threads</h2>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stats - Most Popular Threads</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
 
-        <% if (threads.length===0) { %>
-            <p class="text-center text-muted">No threads yet!</p>
-            <% } else { %>
-                <% threads.forEach(thread=> { %>
-                    <div class="glass-card p-3 mb-3 rounded">
-                        <h4><a href="/threads/<%= thread.thread_id %>" class="text-light text-decoration-none">
-                                <%= thread.title %>
-                            </a></h4>
-                        <p>
-                            <%= thread.description %>
-                        </p>
-                        <div class="d-flex justify-content-between small text-secondary">
-                            <span>Likes: <%= thread.likes %></span>
-                            <span>Views: <%= thread.views %></span>
-                            <span>User: <%= thread.username %></span>
-                        </div>
-                    </div>
-                    <% }) %>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="navbar-brand shiny-text">My Forum</a>
+            <div class="nav-links">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/stats" class="nav-link active">Stats</a>
+                <a href="/threads/new" class="nav-link">New Thread</a>
+                <% if (loggedIn) { %>
+                    <span class="nav-link">Logged in as <strong>
+                            <%= username %>
+                        </strong></span>
+                    <a href="/logout" class="nav-link">Logout</a>
+                    <% } else { %>
+                        <a href="/login" class="nav-link">Login</a>
                         <% } %>
-    </div>
+            </div>
+        </div>
+    </nav>
 
-    <%- include('templates/footer') %>
+    <main class="container">
+        <h1 class="shiny-text">Top Threads</h1>
+
+        <% if (threads && threads.length) { %>
+            <% threads.forEach(t=> { %>
+                <div class="glass-card">
+                    <div class="thread-header">
+                        <h2 class="thread-title">
+                            <a href="/threads/<%= t.thread_id %>">
+                                <%= t.title %>
+                            </a>
+                        </h2>
+                        <small>By <%= t.username %> • <%= new Date(t.created_at).toLocaleString() %></small>
+                    </div>
+                    <div class="thread-meta">
+                        <span><i class="fas fa-heart"></i>
+                            <%= t.total_likes %> Total Likes
+                        </span>
+                        <span><i class="fas fa-comment"></i>
+                            <%= t.comment_count %> Comments
+                        </span>
+                        <span><i class="fas fa-eye"></i>
+                            <%= t.views %> Views
+                        </span>
+                    </div>
+                </div>
+                <% }) %>
+                    <% } else { %>
+                        <p>No data to show right now.</p>
+                        <% } %>
+    </main>
+
+    <footer>
+        <p>© 2025 My Forum App. All rights reserved.</p>
+    </footer>
+
+</body>
+
+</html>
